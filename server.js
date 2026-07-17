@@ -35,7 +35,7 @@ function loadState() {
       history: Array.isArray(s.history) ? s.history : [],
     };
   } catch {
-    return { total: 0, lastUpdated: null, lastAdded: 0, history: [] };
+    return { total: 239, lastUpdated: null, lastAdded: 0, history: [] };
   }
 }
 let state = loadState();
@@ -177,25 +177,66 @@ const PAGE = `<!DOCTYPE html>
   h1{font-size:22px;margin:14px 0 4px;font-weight:700;letter-spacing:-.01em}
   .sub{color:var(--muted);font-size:14px;margin:0 0 24px}
 
+  /* ---- entrance choreography ---- */
+  @keyframes rise{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes riseSm{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes settle{0%{transform:scale(.94)}55%{transform:scale(1.035)}100%{transform:scale(1)}}
+  @keyframes sweep{0%{transform:translateX(-130%) skewX(-18deg)}100%{transform:translateX(230%) skewX(-18deg)}}
+  @keyframes ring{0%{opacity:.55;transform:translate(-50%,-50%) scale(.6)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.9)}}
+  @keyframes floatUp{0%{opacity:0;transform:translateX(-50%) translateY(4px) scale(.9)}18%{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}80%{opacity:1}100%{opacity:0;transform:translateX(-50%) translateY(-26px) scale(1)}}
+  @keyframes glowPulse{0%{text-shadow:0 0 0 rgba(26,143,92,0)}40%{text-shadow:0 0 26px rgba(26,143,92,.45)}100%{text-shadow:0 0 0 rgba(26,143,92,0)}}
+
+  /* elements that animate in start hidden, then get .in */
+  .anim{opacity:0}
+  .anim.in{animation:rise .7s cubic-bezier(.16,.84,.44,1) both}
+  .anim-sm{opacity:0}
+  .anim-sm.in{animation:riseSm .55s cubic-bezier(.16,.84,.44,1) both}
+
   .hero{background:var(--card);border:1px solid var(--line);border-radius:16px;
-        box-shadow:var(--shadow);padding:38px 40px;position:relative;overflow:hidden}
+        box-shadow:var(--shadow);padding:52px 40px;position:relative;overflow:hidden;
+        display:flex;flex-direction:column;align-items:center;text-align:center}
   .hero:before{content:"";position:absolute;inset:0;
-        background:radial-gradient(120% 100% at 100% 0,rgba(26,143,92,.08),transparent 55%);}
+        background:radial-gradient(100% 90% at 50% 0,rgba(26,143,92,.08),transparent 60%);}
   .hero .label{color:var(--muted);font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+
+  .countwrap{position:relative;display:inline-block;margin:12px 0 8px}
   .count{font-family:'Roboto Mono',monospace;font-weight:600;
          font-size:clamp(56px,12vw,104px);line-height:1;letter-spacing:-.02em;
-         color:var(--ink);margin:8px 0 6px;transition:color .25s}
+         color:var(--ink);position:relative;z-index:1;display:inline-block;
+         transition:color .25s;transform-origin:center}
+  .count.settle{animation:settle .6s cubic-bezier(.34,1.56,.64,1),glowPulse 1s ease-out}
   .count.bumped{color:var(--brand)}
-  .metrow{display:flex;gap:28px;flex-wrap:wrap;margin-top:18px;position:relative}
+  /* shimmer sweep that runs across the number once on load / on update */
+  .countwrap .shine{position:absolute;top:0;left:0;height:100%;width:34%;z-index:2;
+        pointer-events:none;opacity:0;
+        background:linear-gradient(90deg,transparent,rgba(255,255,255,.85),transparent);
+        mix-blend-mode:overlay}
+  .countwrap.sweep .shine{opacity:1;animation:sweep 1.05s cubic-bezier(.4,0,.2,1)}
+  /* expanding ring on update */
+  .countwrap .ripple{position:absolute;top:50%;left:50%;width:120px;height:120px;
+        border-radius:50%;border:2px solid var(--brand);z-index:0;opacity:0;pointer-events:none}
+  .countwrap.ripple-go .ripple{animation:ring .9s ease-out}
+
+  .metrow{display:flex;gap:28px;flex-wrap:wrap;margin-top:20px;position:relative;justify-content:center}
+  .metric{text-align:center}
   .metric .k{font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em}
   .metric .v{font-size:15px;font-weight:600;margin-top:3px}
-  .flash{position:absolute;top:34px;right:40px;background:var(--brand);color:#fff;
+  .flash{position:absolute;top:22px;right:24px;background:var(--brand);color:#fff;
          font-weight:600;font-size:13px;padding:6px 12px;border-radius:100px;
-         opacity:0;transform:translateY(-6px);pointer-events:none;transition:all .3s}
+         opacity:0;transform:translateY(-6px);pointer-events:none;transition:all .3s;
+         box-shadow:0 6px 18px rgba(26,143,92,.35)}
   .flash.show{opacity:1;transform:translateY(0)}
+  /* floating "+N" that rises off the number on update */
+  .floater{position:absolute;left:50%;top:-8px;transform:translateX(-50%);z-index:3;pointer-events:none;
+           font-family:'Roboto Mono',monospace;font-weight:600;font-size:26px;color:var(--brand);opacity:0}
+  .floater.go{animation:floatUp 1.4s ease-out}
 
-  .grid{display:grid;grid-template-columns:1.4fr 1fr;gap:20px;margin-top:20px}
-  @media(max-width:720px){.grid{grid-template-columns:1fr}}
+  @media(prefers-reduced-motion:reduce){
+    .anim,.anim-sm{opacity:1;animation:none!important}
+    .count.settle,.countwrap.sweep .shine,.countwrap.ripple-go .ripple,.floater.go{animation:none!important}
+  }
+
+  .grid{display:grid;grid-template-columns:1fr;gap:20px;margin-top:20px}
   .panel{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:20px 22px}
   .panel h2{font-size:14px;margin:0 0 14px;font-weight:600}
   table{width:100%;border-collapse:collapse;font-size:13px}
@@ -207,6 +248,7 @@ const PAGE = `<!DOCTYPE html>
   .kv{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px dashed var(--line);font-size:13px}
   .kv:last-child{border-bottom:0}
   .kv span:first-child{color:var(--muted)}
+  .pnote{color:var(--muted);font-size:13px;line-height:1.55;margin:0 0 14px}
   .foot{color:var(--muted);font-size:12px;text-align:center;margin:26px 0 40px}
   code{background:#eef2f6;padding:2px 6px;border-radius:5px;font-family:'Roboto Mono',monospace;font-size:12px}
 </style>
@@ -215,48 +257,42 @@ const PAGE = `<!DOCTYPE html>
   <div class="topbar">
     <div class="logo">B</div>
     <div class="name">Books</div>
-    <div class="svc">Log Alerts · US</div>
   </div>
 
   <div class="wrap">
-    <span class="eyebrow"><span class="dot"></span> Live · updates automatically</span>
-    <h1>MTD Income Tax — Successful Submissions</h1>
-    <p class="sub">Running Month-to-Date total, tallied from Count Based Search Alerts.</p>
+    <span class="eyebrow anim-sm"><span class="dot"></span> Live · updates automatically</span>
+    <h1 class="anim-sm">MTD Income Tax — Successful Submissions</h1>
 
-    <div class="hero">
+    <div class="hero anim">
       <div class="flash" id="flash">+0 new</div>
       <div class="label">Total MTD submissions</div>
-      <div class="count" id="count">0</div>
+      <div class="countwrap" id="countwrap">
+        <span class="ripple"></span>
+        <span class="count" id="count">0</span>
+        <span class="shine"></span>
+        <span class="floater" id="floater"></span>
+      </div>
       <div class="metrow">
-        <div class="metric"><div class="k">Last update</div><div class="v" id="lastUpdated">—</div></div>
-        <div class="metric"><div class="k">Last batch</div><div class="v" id="lastAdded">—</div></div>
-        <div class="metric"><div class="k">Service</div><div class="v">books</div></div>
+        <div class="metric anim-sm"><div class="k">Last update</div><div class="v" id="lastUpdated">—</div></div>
+        <div class="metric anim-sm"><div class="k">Last batch</div><div class="v" id="lastAdded">—</div></div>
       </div>
     </div>
 
     <div class="grid">
-      <div class="panel">
+      <div class="panel anim">
         <h2>Recent updates</h2>
         <table>
           <thead><tr><th>Time</th><th>Added</th><th>Running total</th></tr></thead>
           <tbody id="hist"><tr><td colspan="3" class="empty">Waiting for the first alert…</td></tr></tbody>
         </table>
       </div>
-      <div class="panel">
-        <h2>Alert details</h2>
-        <div class="kv"><span>Alert</span><span>MTD Income tax — Successful Submissions</span></div>
-        <div class="kv"><span>Type</span><span>Count based search</span></div>
-        <div class="kv"><span>Threshold</span><span>&gt; 0</span></div>
-        <div class="kv"><span>Region</span><span>US</span></div>
-      </div>
     </div>
-
-    <p class="foot">Point your alert webhook at <code>/webhook</code>. Counts add to the total each time an alert fires.</p>
   </div>
 
 <script>
   const el = id => document.getElementById(id);
-  let displayed = 0;   // what's currently shown
+  const reduce = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+  let displayed = 0;
   let firstLoad = true;
 
   function fmtTime(iso){
@@ -265,17 +301,60 @@ const PAGE = `<!DOCTYPE html>
     return d.toLocaleString(undefined,{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
   }
 
-  // animate the big number from a -> b
-  function animateCount(from, to){
+  // --- entrance choreography: reveal elements in a staggered cascade ---
+  function orchestrate(){
+    const seq = [
+      ...document.querySelectorAll('.anim-sm'),
+      ...document.querySelectorAll('.anim')
+    ];
+    // order roughly by document position for a clean top-to-bottom cascade
+    seq.sort((a,b)=> a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1);
+    seq.forEach((node,i)=>{
+      setTimeout(()=>node.classList.add('in'), reduce ? 0 : 90*i);
+    });
+  }
+
+  // shimmer sweep across the number
+  function sweep(){
+    const w = el('countwrap');
+    w.classList.remove('sweep'); void w.offsetWidth; w.classList.add('sweep');
+    setTimeout(()=>w.classList.remove('sweep'), 1100);
+  }
+  function settle(){
+    const n = el('count');
+    n.classList.remove('settle'); void n.offsetWidth; n.classList.add('settle');
+    setTimeout(()=>n.classList.remove('settle'), 700);
+  }
+  function ripple(){
+    const w = el('countwrap');
+    w.classList.remove('ripple-go'); void w.offsetWidth; w.classList.add('ripple-go');
+    setTimeout(()=>w.classList.remove('ripple-go'), 950);
+  }
+  function floatPlus(added){
+    const f = el('floater');
+    f.textContent = '+' + added;
+    f.classList.remove('go'); void f.offsetWidth; f.classList.add('go');
+    setTimeout(()=>f.classList.remove('go'), 1450);
+  }
+
+  // count-up with easing; longer + shimmer on the initial reveal
+  function animateCount(from, to, opts){
+    opts = opts || {};
     const node = el('count');
-    const dur = 900, start = performance.now();
-    node.classList.add('bumped');
+    const dur = opts.dur || 900;
+    const start = performance.now();
+    if(opts.bump) node.classList.add('bumped');
+    if(reduce){ node.textContent = to.toLocaleString(); if(opts.bump) setTimeout(()=>node.classList.remove('bumped'),400); return; }
     function step(now){
       const p = Math.min((now-start)/dur, 1);
-      const eased = 1 - Math.pow(1-p, 3);       // easeOutCubic
+      const eased = 1 - Math.pow(1-p, 3);        // easeOutCubic
       node.textContent = Math.round(from + (to-from)*eased).toLocaleString();
       if(p < 1) requestAnimationFrame(step);
-      else { node.textContent = to.toLocaleString(); setTimeout(()=>node.classList.remove('bumped'),400); }
+      else {
+        node.textContent = to.toLocaleString();
+        settle();
+        if(opts.bump) setTimeout(()=>node.classList.remove('bumped'),450);
+      }
     }
     requestAnimationFrame(step);
   }
@@ -304,20 +383,27 @@ const PAGE = `<!DOCTYPE html>
       renderHistory(s.history);
 
       if(firstLoad){
-        el('count').textContent = (s.total||0).toLocaleString();
-        displayed = s.total || 0;
         firstLoad = false;
+        const total = s.total || 0;
+        // let the hero finish rising, then roll the number up from 0 with shimmer
+        const delay = reduce ? 0 : 560;
+        setTimeout(()=>{
+          sweep();
+          animateCount(0, total, {dur: total>0 ? 1500 : 400});
+          displayed = total;
+        }, delay);
       } else if(s.total !== displayed){
         const added = s.total - displayed;
-        if(added > 0) showFlash(added);
-        animateCount(displayed, s.total);
+        if(added > 0){ showFlash(added); floatPlus(added); ripple(); sweep(); }
+        animateCount(displayed, s.total, {dur:1000, bump:true});
         displayed = s.total;
       }
     }catch(e){ /* keep trying */ }
   }
 
+  orchestrate();
   poll();
-  setInterval(poll, 4000);   // check every 4s
+  setInterval(poll, 4000);
 </script>
 </body>
 </html>`;
