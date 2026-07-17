@@ -250,6 +250,13 @@ const PAGE = `<!DOCTYPE html>
   .kv span:first-child{color:var(--muted)}
   .pnote{color:var(--muted);font-size:13px;line-height:1.55;margin:0 0 14px}
   .foot{color:var(--muted);font-size:12px;text-align:center;margin:26px 0 40px}
+  .callout{display:flex;align-items:flex-start;gap:11px;margin-top:18px;
+           background:var(--brand-soft);border:1px solid rgba(26,143,92,.28);
+           border-left:4px solid var(--brand);border-radius:10px;
+           padding:14px 16px;color:#1a5238;font-size:13.5px;line-height:1.5}
+  .callout b{color:var(--brand);font-weight:700}
+  .callout-ic{flex:none;width:20px;height:20px;border-radius:50%;background:var(--brand);
+              color:#fff;font-size:13px;font-weight:700;display:grid;place-items:center;margin-top:1px}
   code{background:#eef2f6;padding:2px 6px;border-radius:5px;font-family:'Roboto Mono',monospace;font-size:12px}
 </style>
 </head>
@@ -261,7 +268,7 @@ const PAGE = `<!DOCTYPE html>
 
   <div class="wrap">
     <span class="eyebrow anim-sm"><span class="dot"></span> Live · updates automatically</span>
-    <h1 class="anim-sm">MTD Income Tax — Successful Submissions</h1>
+    <h1 class="anim-sm">MTD Income Tax - Successful Submissions</h1>
 
     <div class="hero anim">
       <div class="flash" id="flash">+0 new</div>
@@ -276,6 +283,11 @@ const PAGE = `<!DOCTYPE html>
         <div class="metric anim-sm"><div class="k">Last update</div><div class="v" id="lastUpdated">—</div></div>
         <div class="metric anim-sm"><div class="k">Last batch</div><div class="v" id="lastAdded">—</div></div>
       </div>
+    </div>
+
+    <div class="callout anim-sm">
+      <span class="callout-ic">ℹ</span>
+      <span>This total includes <b>all submission types</b> — <b>Quarterly Updates</b>, <b>End of Year submissions</b>, and <b>Final Declarations</b>.</span>
     </div>
 
     <div class="grid">
