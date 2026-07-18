@@ -249,6 +249,25 @@ const PAGE = `<!DOCTYPE html>
   .kv:last-child{border-bottom:0}
   .kv span:first-child{color:var(--muted)}
   .pnote{color:var(--muted);font-size:13px;line-height:1.55;margin:0 0 14px}
+
+  /* ---- milestone confetti + banner ---- */
+  .confetti-layer{position:fixed;inset:0;pointer-events:none;z-index:60;overflow:hidden}
+  .confetti-piece{position:absolute;top:-20px;border-radius:2px;opacity:.95;
+    animation-name:confettiFall;animation-timing-function:cubic-bezier(.25,.6,.4,1);
+    animation-fill-mode:forwards}
+  @keyframes confettiFall{
+    0%{transform:translateY(-20px) translateX(0) rotate(0);opacity:1}
+    100%{transform:translateY(102vh) translateX(var(--drift)) rotate(var(--spin));opacity:.9}
+  }
+  .milestone-banner{position:fixed;top:22px;left:50%;transform:translate(-50%,-24px);
+    z-index:70;pointer-events:none;opacity:0;
+    background:linear-gradient(135deg,var(--brand),#28c07e);color:#fff;font-weight:700;
+    font-size:15px;padding:12px 22px;border-radius:100px;
+    box-shadow:0 10px 30px rgba(26,143,92,.4);transition:opacity .35s,transform .35s}
+  .milestone-banner.show{opacity:1;transform:translate(-50%,0)}
+  @media(prefers-reduced-motion:reduce){
+    .milestone-banner{transition:opacity .2s}
+  }
   .foot{color:var(--muted);font-size:12px;text-align:center;margin:26px 0 40px}
   .callout{display:flex;align-items:flex-start;gap:11px;margin-top:18px;
            background:var(--brand-soft);border:1px solid rgba(26,143,92,.28);
@@ -261,13 +280,15 @@ const PAGE = `<!DOCTYPE html>
 </style>
 </head>
 <body>
+  <div id="confetti" class="confetti-layer" aria-hidden="true"></div>
+  <div id="milestone" class="milestone-banner"></div>
   <div class="topbar">
     <div class="logo">B</div>
     <div class="name">Books</div>
   </div>
 
   <div class="wrap">
-    <span class="eyebrow anim-sm"><span class="dot"></span> Live · updates automatically</span>
+    <span class="eyebrow anim-sm"><span class="dot"></span> Live · updates every hour</span>
     <h1 class="anim-sm">MTD Income Tax - Successful Submissions</h1>
 
     <div class="hero anim">
@@ -408,9 +429,49 @@ const PAGE = `<!DOCTYPE html>
         const added = s.total - displayed;
         if(added > 0){ showFlash(added); floatPlus(added); ripple(); sweep(); }
         animateCount(displayed, s.total, {dur:1000, bump:true});
+
+        // milestone: crossed a new multiple of 50 (250, 300, ...)
+        const prevMilestone = Math.floor(displayed / 50);
+        const newMilestone = Math.floor(s.total / 50);
+        if(newMilestone > prevMilestone && s.total > 0){
+          const reached = newMilestone * 50;
+          setTimeout(()=>celebrate(reached), reduce ? 0 : 700);
+        }
+
         displayed = s.total;
       }
     }catch(e){ /* keep trying */ }
+  }
+
+  // ---- milestone confetti + banner ----
+  function celebrate(milestone){
+    // banner
+    const b = document.getElementById('milestone');
+    b.textContent = '🎉 Crossed ' + milestone.toLocaleString() + ' submissions!';
+    b.classList.remove('show'); void b.offsetWidth; b.classList.add('show');
+    setTimeout(()=>b.classList.remove('show'), 4200);
+
+    if(reduce) return;
+
+    // confetti
+    const colors = ['#1a8f5c','#28c07e','#0f7ae5','#f5b301','#e0447a','#7b5cff'];
+    const layer = document.getElementById('confetti');
+    const N = 130;
+    for(let i=0;i<N;i++){
+      const p = document.createElement('span');
+      p.className = 'confetti-piece';
+      const size = 6 + Math.random()*8;
+      p.style.left = (Math.random()*100) + '%';
+      p.style.width = size + 'px';
+      p.style.height = (size*0.5) + 'px';
+      p.style.background = colors[i % colors.length];
+      p.style.animationDelay = (Math.random()*0.35) + 's';
+      p.style.animationDuration = (1.8 + Math.random()*1.4) + 's';
+      p.style.setProperty('--drift', ((Math.random()*2-1)*160).toFixed(0) + 'px');
+      p.style.setProperty('--spin', (360 + Math.random()*720).toFixed(0) + 'deg');
+      layer.appendChild(p);
+      setTimeout(()=>p.remove(), 3600);
+    }
   }
 
   orchestrate();
