@@ -424,23 +424,30 @@ const PAGE = `<!DOCTYPE html>
           sweep();
           animateCount(0, total, {dur: total>0 ? 1500 : 400});
           displayed = total;
+          // celebrate the latest milestone once per browser session
+          maybeCelebrateMilestone(total, {delay: 900});
         }, delay);
       } else if(s.total !== displayed){
         const added = s.total - displayed;
         if(added > 0){ showFlash(added); floatPlus(added); ripple(); sweep(); }
         animateCount(displayed, s.total, {dur:1000, bump:true});
-
-        // milestone: crossed a new multiple of 50 (250, 300, ...)
-        const prevMilestone = Math.floor(displayed / 50);
-        const newMilestone = Math.floor(s.total / 50);
-        if(newMilestone > prevMilestone && s.total > 0){
-          const reached = newMilestone * 50;
-          setTimeout(()=>celebrate(reached), reduce ? 0 : 700);
-        }
-
+        maybeCelebrateMilestone(s.total, {delay: 700});
         displayed = s.total;
       }
     }catch(e){ /* keep trying */ }
+  }
+
+  // fire confetti for the latest 50-milestone, at most once per browser session
+  function maybeCelebrateMilestone(total, opts){
+    opts = opts || {};
+    if(!total || total < 50) return;
+    const reached = Math.floor(total / 50) * 50;   // latest milestone passed
+    let seen = 0;
+    try { seen = parseInt(sessionStorage.getItem('mtdMilestone') || '0', 10) || 0; } catch(e){}
+    if(reached > seen){
+      try { sessionStorage.setItem('mtdMilestone', String(reached)); } catch(e){}
+      setTimeout(()=>celebrate(reached), reduce ? 0 : (opts.delay || 700));
+    }
   }
 
   // ---- milestone confetti + banner ----
