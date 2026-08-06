@@ -470,7 +470,7 @@ const PAGE = `<!DOCTYPE html>
             : (s && s.today && s.today.count) || 0;
     const verb = n === 1 ? 'submission has' : 'submissions have';
     el('todayLine').innerHTML =
-      'A total of <b>'+n.toLocaleString()+'</b> successful '+verb+' been made <b>today</b>, so far.';
+      'A Total of <b>'+n.toLocaleString()+'</b> successful '+verb+' been made <b>today</b>, so far.';
   }
 
   function renderHistory(history){
@@ -506,7 +506,19 @@ const PAGE = `<!DOCTYPE html>
         const added = s.total - displayed;
         if(added > 0){ showFlash(added); floatPlus(added); ripple(); sweep(); }
         animateCount(displayed, s.total, {dur:1000, bump:true});
-        maybeCelebrateMilestone(s.total, {delay: 700});
+        // If this live update crosses into a new thousand, ALWAYS fire the big
+        // celebration for it — even if another milestone already celebrated
+        // this session, and even if the batch jumped past the exact thousand.
+        const crossedThousand = added > 0 &&
+          Math.floor(s.total / 1000) > Math.floor(displayed / 1000);
+        if(crossedThousand){
+          const milestone = Math.floor(s.total / 1000) * 1000;
+          // keep the session guard in step so it doesn't replay on the next poll
+          try{ sessionStorage.setItem('mtdMilestone', String(Math.floor(s.total/50)*50)); }catch(e){}
+          setTimeout(()=>celebrateBig(milestone), reduce ? 0 : 700);
+        } else {
+          maybeCelebrateMilestone(s.total, {delay: 700});
+        }
         displayed = s.total;
       }
     }catch(e){ /* keep trying */ }
