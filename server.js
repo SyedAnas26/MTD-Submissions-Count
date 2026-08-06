@@ -23,19 +23,46 @@ const PORT = process.env.PORT || 3000;
 const ADMIN_KEY = process.env.ADMIN_KEY || "changeme";
 const STATE_FILE = path.join(__dirname, "state.json");
 
+// ---------- day helpers (for the "today" counter) ----------
+// The dashboard is anchored to India Standard Time so "today" and the row
+// times are consistent no matter where the server runs or who is viewing.
+const TZ = "Asia/Kolkata";
+// Date in IST as YYYY-MM-DD.
+function dayKey(d) {
+  return new Date(d || Date.now()).toLocaleDateString("en-CA", { timeZone: TZ });
+}
+// Make sure state.today reflects the current day. If the stored day is stale
+// (new day, first run, or migration), re-derive today's count from history.
+// Returns true if it changed anything.
+function syncToday(st) {
+  const key = dayKey();
+  if (st.today && st.today.date === key) return false;
+  let count = 0;
+  for (const h of st.history) {
+    if (dayKey(h.at) === key) count += Number(h.added) || 0;
+  }
+  st.today = { date: key, count };
+  return true;
+}
+
 // ---------- persistence ----------
 function loadState() {
   try {
     const raw = fs.readFileSync(STATE_FILE, "utf8");
     const s = JSON.parse(raw);
-    return {
+    const st = {
       total: Number(s.total) || 0,
       lastUpdated: s.lastUpdated || null,
       lastAdded: Number(s.lastAdded) || 0,
       history: Array.isArray(s.history) ? s.history : [],
+      today: s.today && typeof s.today === "object"
+        ? { date: s.today.date || null, count: Number(s.today.count) || 0 }
+        : { date: null, count: 0 },
     };
+    syncToday(st);   // align the today counter with the current day
+    return st;
   } catch {
-    return { total: 239, lastUpdated: null, lastAdded: 0, history: [] };
+    return { total: 239, lastUpdated: null, lastAdded: 0, history: [], today: { date: dayKey(), count: 0 } };
   }
 }
 let state = loadState();
@@ -103,24 +130,27 @@ const server = http.createServer(async (req, res) => {
         hint: 'Send JSON { "matchedCount": N } or the raw alert text containing "Matched Count ... : N".',
       });
     }
+    syncToday(state);            // roll the today counter over if it's a new day
     state.total += count;
     state.lastAdded = count;
     state.lastUpdated = new Date().toISOString();
+    state.today.count += count;
     state.history.unshift({ added: count, total: state.total, at: state.lastUpdated });
     state.history = state.history.slice(0, 50);
     saveState();
-    return sendJSON(res, 200, { ok: true, added: count, total: state.total });
+    return sendJSON(res, 200, { ok: true, added: count, total: state.total, todayCount: state.today.count });
   }
 
   // -- state (polled by the page) --
   if (url.pathname === "/state" && req.method === "GET") {
-    return sendJSON(res, 200, state);
+    if (syncToday(state)) saveState();   // reflect a midnight rollover even without a new alert
+    return sendJSON(res, 200, { ...state, todayCount: state.today.count });
   }
 
   // -- reset --
   if (url.pathname === "/reset" && req.method === "POST") {
     if (url.searchParams.get("key") !== ADMIN_KEY) return sendJSON(res, 403, { ok: false, error: "Bad key" });
-    state = { total: 0, lastUpdated: new Date().toISOString(), lastAdded: 0, history: [] };
+    state = { total: 0, lastUpdated: new Date().toISOString(), lastAdded: 0, history: [], today: { date: dayKey(), count: 0 } };
     saveState();
     return sendJSON(res, 200, { ok: true, total: 0 });
   }
@@ -342,13 +372,13 @@ const PAGE = `<!DOCTYPE html>
     </div>
 
     <div class="callout anim-sm">
-      <span class="callout-ic">ℹ</span>
-      <span>This total includes <b>all submission types</b> — <b>Quarterly Updates</b>, <b>End of Year submissions</b>, and <b>Final Declarations</b>.</span>
+      <span class="callout-ic">✓</span>
+      <span id="todayLine">Counting today’s submissions…</span>
     </div>
 
     <div class="grid">
       <div class="panel anim">
-        <h2>Recent updates</h2>
+        <h2>Recent updates <span style="color:var(--muted);font-weight:500">(times in IST)</span></h2>
         <table>
           <thead><tr><th>Time</th><th>Added</th><th>Running total</th></tr></thead>
           <tbody id="hist"><tr><td colspan="3" class="empty">Waiting for the first alert…</td></tr></tbody>
@@ -366,7 +396,8 @@ const PAGE = `<!DOCTYPE html>
   function fmtTime(iso){
     if(!iso) return "—";
     const d = new Date(iso);
-    return d.toLocaleString(undefined,{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+    // anchored to India Standard Time so every viewer sees the same clock
+    return d.toLocaleString('en-IN',{timeZone:'Asia/Kolkata',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
   }
 
   // --- entrance choreography: reveal elements in a staggered cascade ---
@@ -434,6 +465,14 @@ const PAGE = `<!DOCTYPE html>
     setTimeout(()=>f.classList.remove('show'), 2600);
   }
 
+  function updateTodayLine(s){
+    const n = (s && s.todayCount != null) ? s.todayCount
+            : (s && s.today && s.today.count) || 0;
+    const verb = n === 1 ? 'submission has' : 'submissions have';
+    el('todayLine').innerHTML =
+      'A total of <b>'+n.toLocaleString()+'</b> successful '+verb+' been made <b>today</b>, so far.';
+  }
+
   function renderHistory(history){
     const tb = el('hist');
     if(!history || !history.length){ tb.innerHTML = '<tr><td colspan="3" class="empty">Waiting for the first alert…</td></tr>'; return; }
@@ -449,6 +488,7 @@ const PAGE = `<!DOCTYPE html>
       el('lastUpdated').textContent = fmtTime(s.lastUpdated);
       el('lastAdded').textContent = s.lastAdded ? ('+'+s.lastAdded) : '—';
       renderHistory(s.history);
+      updateTodayLine(s);
 
       if(firstLoad){
         firstLoad = false;
