@@ -514,7 +514,7 @@ const PAGE = `<!DOCTYPE html>
         if(crossedThousand){
           const milestone = Math.floor(s.total / 1000) * 1000;
           // keep the session guard in step so it doesn't replay on the next poll
-          try{ sessionStorage.setItem('mtdMilestone', String(Math.floor(s.total/50)*50)); }catch(e){}
+          try{ sessionStorage.setItem('mtdMilestone', String(Math.floor(s.total/100)*100)); }catch(e){}
           setTimeout(()=>celebrateBig(milestone), reduce ? 0 : 700);
         } else {
           maybeCelebrateMilestone(s.total, {delay: 700});
@@ -524,18 +524,22 @@ const PAGE = `<!DOCTYPE html>
     }catch(e){ /* keep trying */ }
   }
 
-  // fire a celebration for the latest 50-milestone, at most once per browser session.
-  // Exact thousands (1000, 2000, …) get the big fireworks; every other 50-step
-  // (1050, 1100, …) gets the old confetti celebration.
+  // The big fireworks show once per thousand, on the thousand mark. Its 100-wide
+  // bucket covers 1000–1099 (i.e. "from 1000 up to 1100"); from 1100 onward it's
+  // back to the normal 100-step confetti. Same for 2000, 3000, …
+  function isBigMilestone(m){
+    return m >= 1000 && m % 1000 === 0;
+  }
+  // fire a celebration for the latest 100-milestone, at most once per browser session.
   function maybeCelebrateMilestone(total, opts){
     opts = opts || {};
-    if(!total || total < 50) return;
-    const reached = Math.floor(total / 50) * 50;   // latest 50-step passed
+    if(!total || total < 100) return;
+    const reached = Math.floor(total / 100) * 100;   // latest 100-step passed
     let seen = 0;
     try { seen = parseInt(sessionStorage.getItem('mtdMilestone') || '0', 10) || 0; } catch(e){}
     if(reached > seen){
       try { sessionStorage.setItem('mtdMilestone', String(reached)); } catch(e){}
-      const fn = (reached % 1000 === 0) ? celebrateBig : celebrate;   // fireworks only on the 1000s
+      const fn = isBigMilestone(reached) ? celebrateBig : celebrate;
       setTimeout(()=>fn(reached), reduce ? 0 : (opts.delay || 700));
     }
   }
