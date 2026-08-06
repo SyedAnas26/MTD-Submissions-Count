@@ -265,8 +265,42 @@ const PAGE = `<!DOCTYPE html>
     font-size:15px;padding:12px 22px;border-radius:100px;
     box-shadow:0 10px 30px rgba(26,143,92,.4);transition:opacity .35s,transform .35s}
   .milestone-banner.show{opacity:1;transform:translate(-50%,0)}
+  .milestone-banner.big{background:linear-gradient(135deg,#f5b301,#e0447a 55%,#7b5cff);
+    font-size:17px;box-shadow:0 12px 38px rgba(224,68,122,.45)}
+
+  /* ---- fireworks (thousands milestones) ---- */
+  .fireworks-layer{position:fixed;inset:0;pointer-events:none;z-index:65;overflow:hidden}
+  .fw-burst{position:absolute;width:0;height:0}
+  .fw-spark{position:absolute;left:0;top:0;width:7px;height:7px;border-radius:50%;
+    transform:translate(-50%,-50%);opacity:1;
+    box-shadow:0 0 8px 1px currentColor;
+    animation:fwFly var(--fw-dur,1100ms) cubic-bezier(.15,.6,.3,1) forwards}
+  @keyframes fwFly{
+    0%{transform:translate(-50%,-50%) translate(0,0) scale(1);opacity:1}
+    70%{opacity:1}
+    100%{transform:translate(-50%,-50%) translate(var(--fw-x),var(--fw-y)) scale(.3);opacity:0}
+  }
+  .fw-flash{position:absolute;width:12px;height:12px;border-radius:50%;
+    transform:translate(-50%,-50%);background:#fff;
+    box-shadow:0 0 26px 12px rgba(255,255,255,.9);
+    animation:fwFlash .5s ease-out forwards}
+  @keyframes fwFlash{0%{opacity:.95;transform:translate(-50%,-50%) scale(.4)}
+    100%{opacity:0;transform:translate(-50%,-50%) scale(2.4)}}
+  /* a rocket that streaks up from the bottom, then bursts at its apex */
+  .fw-rocket{position:absolute;bottom:0;width:4px;height:16px;border-radius:2px;
+    transform:translate(-50%,0);background:currentColor;
+    box-shadow:0 0 10px 3px currentColor;
+    animation:fwRise var(--rk-dur,850ms) cubic-bezier(.15,.7,.35,1) forwards}
+  @keyframes fwRise{
+    0%{transform:translate(-50%,0) scaleY(.7);opacity:.2}
+    12%{opacity:1}
+    88%{opacity:1}
+    100%{transform:translate(-50%,var(--rk-y)) scaleY(1.15);opacity:.5}
+  }
+
   @media(prefers-reduced-motion:reduce){
     .milestone-banner{transition:opacity .2s}
+    .fireworks-layer{display:none}
   }
   .foot{color:var(--muted);font-size:12px;text-align:center;margin:26px 0 40px}
   .callout{display:flex;align-items:flex-start;gap:11px;margin-top:18px;
@@ -281,6 +315,7 @@ const PAGE = `<!DOCTYPE html>
 </head>
 <body>
   <div id="confetti" class="confetti-layer" aria-hidden="true"></div>
+  <div id="fireworks" class="fireworks-layer" aria-hidden="true"></div>
   <div id="milestone" class="milestone-banner"></div>
   <div class="topbar">
     <div class="logo">B</div>
@@ -437,16 +472,19 @@ const PAGE = `<!DOCTYPE html>
     }catch(e){ /* keep trying */ }
   }
 
-  // fire confetti for the latest 50-milestone, at most once per browser session
+  // fire a celebration for the latest 50-milestone, at most once per browser session.
+  // Exact thousands (1000, 2000, …) get the big fireworks; every other 50-step
+  // (1050, 1100, …) gets the old confetti celebration.
   function maybeCelebrateMilestone(total, opts){
     opts = opts || {};
     if(!total || total < 50) return;
-    const reached = Math.floor(total / 50) * 50;   // latest milestone passed
+    const reached = Math.floor(total / 50) * 50;   // latest 50-step passed
     let seen = 0;
     try { seen = parseInt(sessionStorage.getItem('mtdMilestone') || '0', 10) || 0; } catch(e){}
     if(reached > seen){
       try { sessionStorage.setItem('mtdMilestone', String(reached)); } catch(e){}
-      setTimeout(()=>celebrate(reached), reduce ? 0 : (opts.delay || 700));
+      const fn = (reached % 1000 === 0) ? celebrateBig : celebrate;   // fireworks only on the 1000s
+      setTimeout(()=>fn(reached), reduce ? 0 : (opts.delay || 700));
     }
   }
 
@@ -459,11 +497,13 @@ const PAGE = `<!DOCTYPE html>
     setTimeout(()=>b.classList.remove('show'), 4200);
 
     if(reduce) return;
+    dropConfetti(130);
+  }
 
-    // confetti
+  // spawn a shower of confetti pieces (no banner)
+  function dropConfetti(N){
     const colors = ['#1a8f5c','#28c07e','#0f7ae5','#f5b301','#e0447a','#7b5cff'];
     const layer = document.getElementById('confetti');
-    const N = 130;
     for(let i=0;i<N;i++){
       const p = document.createElement('span');
       p.className = 'confetti-piece';
@@ -479,6 +519,103 @@ const PAGE = `<!DOCTYPE html>
       layer.appendChild(p);
       setTimeout(()=>p.remove(), 3600);
     }
+  }
+
+  // ---- fireworks + confetti for thousands milestones ----
+  function celebrateBig(milestone){
+    // banner (bigger, celebratory)
+    const b = document.getElementById('milestone');
+    b.textContent = '🎉 Crossed ' + milestone.toLocaleString() + ' submissions!';
+    b.classList.add('big');
+    b.classList.remove('show'); void b.offsetWidth; b.classList.add('show');
+    // fade out first, then drop the .big style AFTER it's hidden so it never
+    // flashes back to the base (green) gradient mid-fade
+    setTimeout(()=>{
+      b.classList.remove('show');
+      setTimeout(()=>b.classList.remove('big'), 450);
+    }, 6000);
+
+    if(reduce) return;
+
+    // a single generous shower of confetti under the fireworks
+    dropConfetti(220);
+
+    // stagger a long run of firework bursts across the screen
+    const bursts = 10;
+    for(let i=0;i<bursts;i++){
+      setTimeout(()=>fireworkBurst(), i * 300);
+    }
+    // a couple of quick double-bursts for extra sparkle
+    setTimeout(()=>{ fireworkBurst(); fireworkBurst(); }, 500);
+    setTimeout(()=>{ fireworkBurst(); fireworkBurst(); }, 2200);
+
+    // a few rockets that launch from the bottom and burst at their apex
+    for(let i=0;i<3;i++){
+      setTimeout(()=>launchRocket(), 150 + i*520);
+    }
+  }
+
+  // launch a rocket from the bottom that streaks up and bursts at its apex
+  function launchRocket(cxVw, apexVh){
+    const layer = document.getElementById('fireworks');
+    if(!layer) return;
+    const cx = cxVw != null ? cxVw : (20 + Math.random()*60);     // vw
+    const apex = apexVh != null ? apexVh : (22 + Math.random()*20); // vh from top
+    const color = FW_COLORS[Math.floor(Math.random()*FW_COLORS.length)];
+
+    const rk = document.createElement('span');
+    rk.className = 'fw-rocket';
+    rk.style.left = cx + 'vw';
+    rk.style.color = color;
+    // rise from the bottom up to the apex height
+    const riseY = -(window.innerHeight * (1 - apex/100));
+    rk.style.setProperty('--rk-y', riseY.toFixed(0) + 'px');
+    const dur = 780 + Math.random()*260;
+    rk.style.setProperty('--rk-dur', dur.toFixed(0) + 'ms');
+    layer.appendChild(rk);
+
+    // when it reaches the top, remove the rocket and burst there
+    setTimeout(()=>{ rk.remove(); fireworkBurst(cx, apex); }, dur);
+  }
+
+  const FW_COLORS = ['#f5b301','#e0447a','#7b5cff','#28c07e','#0f7ae5','#ff7a3d','#ffffff'];
+  function fireworkBurst(x, y){
+    const layer = document.getElementById('fireworks');
+    if(!layer) return;
+    // random launch point in the upper 60% of the screen
+    const cx = x != null ? x : (10 + Math.random()*80);          // vw
+    const cy = y != null ? y : (12 + Math.random()*48);          // vh
+    const color = FW_COLORS[Math.floor(Math.random()*FW_COLORS.length)];
+
+    const burst = document.createElement('div');
+    burst.className = 'fw-burst';
+    burst.style.left = cx + 'vw';
+    burst.style.top  = cy + 'vh';
+
+    // central flash
+    const flash = document.createElement('span');
+    flash.className = 'fw-flash';
+    burst.appendChild(flash);
+
+    // radiating sparks
+    const sparks = 26 + Math.floor(Math.random()*10);
+    const radius = 90 + Math.random()*70;   // px
+    for(let i=0;i<sparks;i++){
+      const ang = (i / sparks) * Math.PI * 2 + Math.random()*0.2;
+      const r = radius * (0.7 + Math.random()*0.3);
+      const s = document.createElement('span');
+      s.className = 'fw-spark';
+      // mostly one color per burst, with a few accent sparks
+      s.style.color = Math.random() < 0.2 ? FW_COLORS[Math.floor(Math.random()*FW_COLORS.length)] : color;
+      s.style.background = 'currentColor';
+      s.style.setProperty('--fw-x', (Math.cos(ang)*r).toFixed(0) + 'px');
+      s.style.setProperty('--fw-y', (Math.sin(ang)*r).toFixed(0) + 'px');
+      s.style.setProperty('--fw-dur', (900 + Math.random()*500).toFixed(0) + 'ms');
+      burst.appendChild(s);
+    }
+
+    layer.appendChild(burst);
+    setTimeout(()=>burst.remove(), 1800);
   }
 
   orchestrate();
