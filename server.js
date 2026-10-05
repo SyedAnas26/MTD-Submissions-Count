@@ -182,7 +182,7 @@ const PAGE = `<!DOCTYPE html>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <meta name="color-scheme" content="light"/>
-<title>MTD Income Tax — Submissions</title>
+<title>MTD Income Tax Submissions</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Roboto+Mono:wght@500;600;700&display=swap" rel="stylesheet">
@@ -192,33 +192,36 @@ const PAGE = `<!DOCTYPE html>
      blue   = Zoho Books brand chrome: logo, rails, chart bars
      amber  = the one highlight (newest batch)                       */
   :root{
-    --bg:#f3f6f9;
+    --bg:#eef4fb;
     --surface:#ffffff;
-    --surface-2:#f7f9fb;
-    --ink:#0f2235;
-    --ink-deep:#0c1f36;      /* dark blue, close to black — the flip cards */
-    --card-ink:#f0f6fc;      /* the digits, reading out of the dark card */
-    --card-seam:#1e4064;     /* the hinge gap between the two leaves */
-    --ink-2:#3f556c;
-    --muted:#7a8b9d;
-    --line:#e3eaf2;
-    --line-soft:#edf1f6;
+    --surface-2:#f7fafd;
+    --ink:#0f2744;
+    --ink-deep:#0c1f36;
+    --card-ink:#ffffff;      /* the digits, reading out of the blue card */
+    --card-seam:#174a8c;     /* the hinge gap between the two leaves */
+    --ink-2:#44586e;
+    --muted:#8295ab;
+    --line:#e2eaf4;
+    --line-soft:#eef3f9;
 
-    --green:#178a5a;
-    --green-2:#23b377;
-    --green-soft:#e7f5ef;
+    --green:#15a05a;
+    --green-2:#2cb972;
+    --green-soft:#e7f7ee;
 
-    --blue:#226db4;          /* Zoho Books blue */
-    --blue-2:#4a9ddd;
-    --blue-soft:#e9f2fa;
-    --blue-ring:rgba(34,109,180,.4);
+    --blue:#2f6fe4;          /* Books blue */
+    --blue-2:#5b94f0;
+    --blue-soft:#e9f2ff;
+    --blue-ring:rgba(47,111,228,.4);
 
-    --amber:#e08a1e;
-    --amber-2:#f3a93f;
-    --amber-soft:#fdf3e3;
+    --purple:#7c5cf0;
+    --purple-soft:#f0ecfe;
 
-    --bar:linear-gradient(180deg,#5aa8e2,#2a7cc4);
-    --bar-last:linear-gradient(180deg,#f3a93f,#e08a1e);
+    --amber:#f0883d;
+    --amber-2:#f7a860;
+    --amber-soft:#fef3e6;
+
+    --bar:linear-gradient(180deg,#6fa6f5,#3b7ce8);
+    --bar-last:linear-gradient(180deg,#fbb268,#f0883d);
 
     --shadow:0 1px 2px rgba(15,34,53,.04),0 14px 32px -16px rgba(15,34,53,.2);
     --shadow-lg:0 1px 2px rgba(15,34,53,.05),0 28px 60px -28px rgba(15,34,53,.3);
@@ -232,7 +235,7 @@ const PAGE = `<!DOCTYPE html>
   body{margin:0;background:var(--bg);color:var(--ink);min-height:100vh;
        font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
        -webkit-font-smoothing:antialiased;
-       background-image:radial-gradient(90% 55% at 50% -8%,rgba(34,109,180,.05),transparent 70%);
+       background-image:linear-gradient(180deg,#f6fafe 0%,#eaf2fb 55%,#e6eef9 100%);
        background-repeat:no-repeat;background-attachment:fixed}
 
   /* ============ top bar ============ */
@@ -280,12 +283,16 @@ const PAGE = `<!DOCTYPE html>
   .anim-sm.in{animation:riseSm .55s cubic-bezier(.16,.84,.44,1) both}
 
   /* ============ hero ============ */
-  .hero{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);
-        box-shadow:var(--shadow-lg);padding:26px 30px 24px;position:relative;overflow:hidden}
-  .hero:before{content:"";position:absolute;inset:0;pointer-events:none;
-        background:radial-gradient(85% 100% at 50% -20%,rgba(34,109,180,.07),transparent 62%)}
+  .hero{background:linear-gradient(168deg,#ffffff 0%,#f5faff 55%,#e9f3fd 100%);
+        border:1px solid #dfeaf7;border-radius:var(--r-lg);
+        box-shadow:0 1px 2px rgba(15,39,68,.04),0 22px 44px -26px rgba(47,111,228,.26);
+        padding:26px 30px 24px;position:relative;overflow:hidden}
+  /* two soft wave bands across the lower half */
+  .hero:before{content:"";position:absolute;left:0;right:0;bottom:0;height:50%;pointer-events:none;
+        background-repeat:no-repeat;background-size:100% 100%;
+        background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 320' preserveAspectRatio='none'><path d='M0,78 C190,18 340,132 540,104 C790,70 940,172 1200,82 L1200,320 L0,320 Z' fill='rgba(47,111,228,0.019)'/><path d='M0,160 C220,112 380,206 620,178 C840,152 1010,224 1200,164 L1200,320 L0,320 Z' fill='rgba(47,111,228,0.013)'/></svg>")}
   .hero-top{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;position:relative;z-index:2}
-  .hero-label{color:var(--muted);font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.09em}
+  .hero-label{color:#04172f;font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.09em}
   .hero-label .since{display:block;margin-top:5px;font-style:normal;font-weight:600;
          font-size:11px;letter-spacing:.04em;text-transform:none;color:var(--blue)}
   .flash{background:linear-gradient(135deg,var(--green-2),var(--green));color:#fff;
@@ -314,10 +321,11 @@ const PAGE = `<!DOCTYPE html>
   /* the card. Its own background is the hinge seam colour; the four halves are
      inset 1px vertically, so a hairline of it shows through across the middle. */
   .dg{position:relative;display:inline-block;width:.84em;height:1.38em;
-      perspective:460px;border-radius:.12em;background:var(--card-seam);
-      box-shadow:0 8px 18px -9px rgba(24,54,86,.42),
-                 0 2px 4px -1px rgba(24,54,86,.28),
-                 0 0 0 1px rgba(24,54,86,.16)}
+      perspective:300px;transform-style:preserve-3d;
+      border-radius:.12em;background:var(--card-seam);
+      box-shadow:0 10px 22px -10px rgba(23,74,140,.5),
+                 0 2px 4px -1px rgba(23,74,140,.3),
+                 0 0 0 1px rgba(23,74,140,.18)}
   /* hinge pins, left and right of the seam */
   .dg:before,.dg:after{content:"";position:absolute;top:50%;width:.062em;height:.14em;
       transform:translateY(-50%);border-radius:.025em;z-index:6;pointer-events:none;
@@ -332,28 +340,42 @@ const PAGE = `<!DOCTYPE html>
          text-align:center;display:block}
   /* top halves catch the light, bottom halves fall away slightly */
   .dg .st,.dg .ft{top:0;border-radius:.12em .12em 0 0;
-         background:linear-gradient(180deg,#527fab 0%,#406e98 58%,#39658e 100%);
-         box-shadow:inset 0 1px 0 rgba(255,255,255,.22)}
+         background:linear-gradient(180deg,#4a8bea 0%,#3a79db 58%,#3171d2 100%);
+         box-shadow:inset 0 1px 0 rgba(255,255,255,.26)}
   .dg .sb,.dg .fb{bottom:0;border-radius:0 0 .12em .12em;
-         background:linear-gradient(180deg,#325e88 0%,#3f6e99 62%,#4676a2 100%);
-         box-shadow:inset 0 -1px 0 rgba(255,255,255,.12)}
+         background:linear-gradient(180deg,#1f5bad 0%,#2868bd 62%,#2d70c6 100%);
+         box-shadow:inset 0 -1px 0 rgba(255,255,255,.14)}
   .dg .st > span,.dg .ft > span{top:0}
   .dg .sb > span,.dg .fb > span{bottom:0}
   .dg .st,.dg .sb{z-index:1}
   .dg .ft{z-index:3;transform-origin:bottom center}
   .dg .fb{z-index:3;transform-origin:top center;transform:rotateX(90deg)}
   /* the folding panel darkens a touch as it swings, so the motion reads */
-  .dg.go .ft{animation:foldTop var(--ft,.3s) cubic-bezier(.45,0,.75,.6) var(--d,0ms) forwards}
-  .dg.go .fb{animation:foldBot var(--fb,.34s) cubic-bezier(.3,.6,.4,1)
+  .dg.go .ft{animation:foldTop var(--ft,.3s) cubic-bezier(.52,.04,.78,.46) var(--d,0ms) forwards}
+  .dg.go .fb{animation:foldBot var(--fb,.34s) cubic-bezier(.2,.85,.3,1.06)
              calc(var(--d,0ms) + var(--ft,.3s)) forwards}
+  /* the static bottom half sits in the falling leaf's shadow as it passes over */
+  .dg.go .sb{animation:leafShade var(--ft,.3s) linear var(--d,0ms) both}
+  /* while folding, both leaves catch light along the hinge edge, which is what
+     reads as thickness */
+  .dg.go .ft{box-shadow:inset 0 1px 0 rgba(255,255,255,.24),
+                        inset 0 -2px 3px -1px rgba(255,255,255,.3)}
+  .dg.go .fb{box-shadow:inset 0 -1px 0 rgba(255,255,255,.14),
+                        inset 0 2px 3px -1px rgba(0,0,0,.35)}
   /* while the counter is rolling up from zero the leaves snap over quickly */
-  .count.rolling{--ft:.03s;--fb:.035s}
+  .count.rolling{--ft:.045s;--fb:.05s}
   @keyframes foldTop{
-    from{transform:rotateX(0);filter:brightness(1)}
-    to{transform:rotateX(-90deg);filter:brightness(.9)}}
+    0%{transform:rotateX(0);filter:brightness(1)}
+    70%{filter:brightness(.74)}
+    100%{transform:rotateX(-90deg);filter:brightness(.48)}}
   @keyframes foldBot{
-    from{transform:rotateX(90deg);filter:brightness(.9)}
-    to{transform:rotateX(0);filter:brightness(1)}}
+    0%{transform:rotateX(90deg);filter:brightness(.42)}
+    60%{filter:brightness(.8)}
+    100%{transform:rotateX(0);filter:brightness(1)}}
+  @keyframes leafShade{
+    0%{filter:brightness(1)}
+    75%{filter:brightness(.72)}
+    100%{filter:brightness(.8)}}
   /* same font-size and line box as a card, bottom-aligned, so the comma's
      baseline lands exactly where the digits' baseline does */
   /* entrance only — removed again before the folds run, so no stray transform
@@ -380,11 +402,11 @@ const PAGE = `<!DOCTYPE html>
   .ms{position:relative;z-index:2;max-width:520px;margin:16px auto 2px}
   .ms-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;
            font-size:12px;margin-bottom:7px}
-  .ms-head .l{color:var(--muted);font-weight:600}
+  .ms-head .l{color:var(--ink-2);font-weight:600}
   .ms-head .r{color:var(--blue);font-weight:700;font-family:'Roboto Mono',monospace;font-variant-numeric:tabular-nums;
            transition:color .55s ease}
   .ms-track{height:9px;border-radius:999px;overflow:hidden;
-            background:var(--line-soft);border:1px solid var(--line)}
+            background:#e6ecf5;border:1px solid #dde6f1}
   /* one flat colour across the whole bar; MS_STAGES below picks which one */
   .ms-fill{display:block;height:100%;width:0;border-radius:999px;
            background:#e8736b;
@@ -392,19 +414,30 @@ const PAGE = `<!DOCTYPE html>
 
   /* ============ stat cards — values green, chrome blue ============ */
   .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:16px}
-  .stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);
-        box-shadow:var(--shadow);padding:15px 17px 16px;position:relative;overflow:hidden;
-        transition:transform .2s cubic-bezier(.16,.84,.44,1),box-shadow .2s,border-color .2s}
-  .stat:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);border-color:rgba(34,109,180,.3)}
-  .stat .k{display:flex;align-items:center;gap:7px;color:var(--muted);
+  .stat{border:1px solid var(--line);border-radius:var(--r-md);
+        box-shadow:0 1px 2px rgba(15,39,68,.03),0 10px 22px -16px rgba(15,39,68,.16);
+        padding:15px 17px 16px;position:relative;overflow:hidden;
+        background:var(--surface);
+        transition:transform .2s cubic-bezier(.16,.84,.44,1),box-shadow .2s}
+  .stat:hover{transform:translateY(-2px);
+              box-shadow:0 1px 2px rgba(15,39,68,.04),0 16px 30px -18px rgba(15,39,68,.26)}
+  .stat .k{display:flex;align-items:center;gap:10px;color:var(--ink-2);
            font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em}
-  .stat .k svg{width:13px;height:13px;flex:none;color:var(--blue)}
+  .stat .ic{width:34px;height:34px;border-radius:50%;flex:none;display:grid;place-items:center}
+  .stat .ic svg{width:16px;height:16px}
   .stat .v{font-family:'Roboto Mono',monospace;font-variant-numeric:tabular-nums;
-           font-size:27px;font-weight:700;letter-spacing:-.03em;margin:9px 0 2px;line-height:1;
+           font-size:27px;font-weight:700;letter-spacing:-.03em;margin:11px 0 3px;line-height:1;
            color:var(--green)}
   .stat .s{color:var(--muted);font-size:12px;font-weight:500}
-  .stat.is-today{border-color:rgba(34,109,180,.32);
-                 background:linear-gradient(170deg,var(--blue-soft),var(--surface) 70%)}
+  /* one accent per card, matching the mockup */
+  .s-blue  {background:linear-gradient(168deg,#f3f9ff,#ffffff 72%);border-color:#dceaf9}
+  .s-blue   .ic{background:#dcebff;color:var(--blue)}
+  .s-green {background:linear-gradient(168deg,#f1fbf6,#ffffff 72%);border-color:#d8f0e3}
+  .s-green  .ic{background:#d9f3e5;color:var(--green)}
+  .s-purple{background:linear-gradient(168deg,#f7f4ff,#ffffff 72%);border-color:#e5ddfb}
+  .s-purple .ic{background:#e8e0fd;color:var(--purple)}
+  .s-amber {background:linear-gradient(168deg,#fff9f1,#ffffff 72%);border-color:#f8e7d0}
+  .s-amber  .ic{background:#fdecd8;color:var(--amber)}
 
   /* ============ panels ============ */
   .panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);
@@ -413,17 +446,23 @@ const PAGE = `<!DOCTYPE html>
               padding:15px 20px;border-bottom:1px solid var(--line-soft)}
   .panel-head h2{font-size:13.5px;margin:0;font-weight:650;letter-spacing:-.005em}
   .panel-head .note{color:var(--muted);font-size:11.5px;font-weight:500}
-  .tag{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:650;
-       padding:4px 9px;border-radius:999px;background:var(--surface-2);color:var(--muted);
-       border:1px solid var(--line-soft)}
-  .tag i{width:8px;height:8px;border-radius:3px;display:block;background:var(--bar)}
-  .tag.t-last i{background:var(--bar-last)}
+  .tag{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;font-weight:600;
+       padding:5px 11px;border-radius:999px;background:var(--surface);color:var(--ink-2);
+       border:1px solid var(--line)}
+  .tag i{width:8px;height:8px;border-radius:50%;display:block;background:#3b7ce8}
+  .tag.t-last i{background:var(--amber)}
   .panel-body{padding:18px 20px 20px}
 
   /* ---- activity chart ---- */
-  .chart{display:flex;align-items:flex-end;gap:4px;height:132px;
-         position:relative;padding-bottom:2px;border-bottom:1px solid var(--line)}
-  .chart:before{content:"";position:absolute;left:0;right:0;top:50%;border-top:1px dashed var(--line-soft)}
+  /* axis gutter on the left, plot area on the right */
+  .plot-row{display:flex;align-items:stretch;gap:10px}
+  .yax{position:relative;width:16px;flex:none;height:132px}
+  .yax span{position:absolute;right:0;transform:translateY(50%);
+            color:var(--muted);font-size:11px;font-weight:500;line-height:1}
+  .plot{position:relative;flex:1 1 auto;min-width:0;height:132px}
+  .gl{position:absolute;left:0;right:0;height:0;border-top:1px dashed #dfe7f1}
+  .gl.zero{border-top:1px solid var(--line)}
+  .chart{display:flex;align-items:flex-end;gap:4px;height:100%;position:relative}
   /* the columns always share the full width and it is the BAR that gets capped,
      centred in its column — so 3 updates space out as deliberately as 24 */
   .col{flex:1 1 0;min-width:0;height:100%;position:relative;
@@ -432,7 +471,7 @@ const PAGE = `<!DOCTYPE html>
   .col .val{font-family:'Roboto Mono',monospace;font-variant-numeric:tabular-nums;
        font-size:11px;font-weight:700;color:var(--ink-2);line-height:1;margin-bottom:5px}
   .col.last .val{color:var(--amber)}
-  .col .bar{width:100%;max-width:40px;border-radius:4px 4px 2px 2px;background:var(--bar);min-height:3px;
+  .col .bar{width:100%;max-width:40px;border-radius:5px 5px 2px 2px;background:var(--bar);min-height:3px;
             animation:growBar .62s cubic-bezier(.16,.84,.44,1) both;
             transition:filter .18s,opacity .18s;opacity:.92}
   .col:hover .bar{opacity:1;filter:brightness(1.1) saturate(1.08)}
@@ -447,7 +486,7 @@ const PAGE = `<!DOCTYPE html>
             border:4px solid transparent;border-top-color:var(--ink)}
   .col:hover .tip{opacity:1;transform:translateX(-50%)}
   .chart-x{display:flex;justify-content:space-between;color:var(--muted);
-           font-size:11px;font-weight:500;margin-top:9px}
+           font-size:11px;font-weight:500;margin-top:9px;padding-left:26px}
   .chart-empty{height:132px;display:grid;place-items:center;color:var(--muted);font-size:13px;
                border:1px dashed var(--line);border-radius:var(--r-sm)}
 
@@ -578,7 +617,7 @@ const PAGE = `<!DOCTYPE html>
 
   <main class="wrap">
     <div class="page-head anim-sm">
-      <h1>MTD Income Tax — Successful Submissions</h1>
+      <h1>MTD Income Tax - Successful Submissions</h1>
       <p class="sub" id="headSub">Running total of submissions accepted by HMRC, which includes <b>Q2</b> submissions. The count <b>updates automatically every hour</b>. All times in IST.</p>
     </div>
 
@@ -605,23 +644,23 @@ const PAGE = `<!DOCTYPE html>
     </section>
 
     <section class="stats" aria-label="Key figures">
-      <article class="stat is-today anim-sm">
-        <div class="k"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 20v-9M18 20V7M6 20v-5"/></svg>Today</div>
+      <article class="stat s-blue anim-sm">
+        <div class="k"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg></span>Today</div>
         <div class="v" id="sToday">—</div>
         <div class="s" id="sTodaySub">submissions so far</div>
       </article>
-      <article class="stat anim-sm">
-        <div class="k"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7-7 7 7"/></svg>Last batch</div>
+      <article class="stat s-green anim-sm">
+        <div class="k"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7-7 7 7"/></svg></span>Last batch</div>
         <div class="v" id="sBatch">—</div>
         <div class="s" id="sBatchSub">waiting for the next update</div>
       </article>
-      <article class="stat anim-sm">
-        <div class="k"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="8.4"/><path d="M12 7.3V12l3 1.8"/></svg>Updates today</div>
+      <article class="stat s-purple anim-sm">
+        <div class="k"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="8.4"/><path d="M12 7.3V12l3 1.8"/></svg></span>Updates today</div>
         <div class="v" id="sRuns">—</div>
         <div class="s" id="sRunsSub">hourly updates received</div>
       </article>
-      <article class="stat anim-sm">
-        <div class="k"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15l5-5.5 4 3.5 7-7.5"/><path d="M20 5.5h-4.6M20 5.5v4.6"/></svg>Busiest hour</div>
+      <article class="stat s-amber anim-sm">
+        <div class="k"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15l5-5.5 4 3.5 7-7.5"/><path d="M20 5.5h-4.6M20 5.5v4.6"/></svg></span>Busiest hour</div>
         <div class="v" id="sPeak">—</div>
         <div class="s" id="sPeakSub">no data yet</div>
       </article>
@@ -764,7 +803,7 @@ const PAGE = `<!DOCTYPE html>
     if(cell.tidy) clearTimeout(cell.tidy);
     cell.tidy = setTimeout(()=>{
       cell.classList.remove('go'); cellSet(cell, ch); cell.tidy = null;
-    }, fast ? 150 : 700 + order * 70);
+    }, fast ? 190 : 700 + order * 70);
   }
 
   function paintNumber(value, flip){
@@ -796,8 +835,8 @@ const PAGE = `<!DOCTYPE html>
      up to its digit first; the columns to its left stay on 0 until their turn.
      The milestone rail is deliberately left alone until the whole thing lands,
      so it fills once instead of twitching on every step. */
-  const ROLL_STEP_MS = 70;        // between folds within a column
-  const ROLL_GAP_MS  = 70;        // between one column finishing and the next
+  const ROLL_STEP_MS = 98;        // between folds within a column
+  const ROLL_GAP_MS  = 98;        // between one column finishing and the next
 
   // every value from 1 up to the digit, so a column folds as many times as its
   // digit is worth: 6 is six folds, 0 is none
@@ -870,10 +909,10 @@ const PAGE = `<!DOCTYPE html>
      The bar is a single flat colour that steps red -> amber -> blue -> green
      as it fills, so the colour alone tells you how close the milestone is. */
   const MS_STAGES = [
-    { upto:  25, colour: '#e8736b' },   // just started
-    { upto:  50, colour: '#eca84f' },
-    { upto:  75, colour: '#5a9bd8' },
-    { upto: 101, colour: '#3fb47a' },   // nearly there
+    { upto:  25, colour: '#f0883d' },   // just started
+    { upto:  50, colour: '#f0b429' },
+    { upto:  75, colour: '#2f6fe4' },
+    { upto: 101, colour: '#15a05a' },   // nearly there
   ];
   function msColour(pct){
     for(const st of MS_STAGES) if(pct < st.upto) return st.colour;
@@ -959,27 +998,46 @@ const PAGE = `<!DOCTYPE html>
     }
     const rows = history.slice(0, 24).reverse();
     const max = Math.max.apply(null, rows.map(h => Number(h.added)||0)) || 1;
-    // Headroom: scaling against the max alone turns a run of equal small
-    // batches into a flat wall of full-height bars, which says nothing. A
-    // floor of 4 keeps low activity looking low.
-    const ceiling = Math.max(max, 4);
+
+    // Pick a round axis step (1, 2, 5, 10, 20, 50 …) aiming for ~3 gridlines,
+    // then take the ceiling one step above the peak so a bar never touches the
+    // top of the plot and its label always has room.
+    const raw  = Math.max(max, 1) / 3;
+    const mag  = Math.pow(10, Math.floor(Math.log10(raw)));
+    const norm = raw / mag;
+    const step = Math.max(1, (norm <= 1 ? 1 : norm <= 2 ? 2 : norm <= 5 ? 5 : 10) * mag);
+    let ceiling = step * Math.ceil(max / step);
+    if(ceiling <= max) ceiling += step;
+
+    const ticks = [];
+    for(let v = 0; v <= ceiling + 1e-9; v += step) ticks.push(Math.round(v));
+
     const labelled = rows.length <= 12;        // sparse enough to print values
-    const topPct = labelled ? 84 : 100;        // leave room for the label
     const cols = rows.map((h,i) => {
       const v = Number(h.added)||0;
-      // A single huge batch would otherwise squash every small one into an
-      // invisible sliver, so keep a readable floor. The scale stays linear and
-      // honest; the printed value is what you read the exact figure from.
-      const pct = Math.max(v > 0 ? 9 : 2, Math.round((v/ceiling)*topPct));
+      // One huge batch would squash every small one into nothing, so keep a
+      // readable floor. The printed value is the exact figure.
+      const pct = Math.max(v > 0 ? 4 : 1, (v/ceiling)*100);
       const isLast = i === rows.length-1;
       return '<div class="col' + (isLast ? ' last' : '') + '">'
            +   '<span class="tip">' + fmtTime(h.at) + ' &nbsp;<b>+' + v + '</b></span>'
            +   (labelled ? '<span class="val">+' + v + '</span>' : '')
-           +   '<span class="bar" style="height:' + pct + '%;animation-delay:' + (i*26) + 'ms"></span>'
+           +   '<span class="bar" style="height:' + pct.toFixed(1) + '%;animation-delay:' + (i*26) + 'ms"></span>'
            + '</div>';
     }).join('');
+
+    const axis = ticks.map(t =>
+      '<span style="bottom:' + ((t/ceiling)*100).toFixed(2) + '%">' + t + '</span>').join('');
+    const grid = ticks.map(t =>
+      '<span class="gl' + (t === 0 ? ' zero' : '') + '" style="bottom:'
+      + ((t/ceiling)*100).toFixed(2) + '%"></span>').join('');
+
     const spanOne = rows.length === 1;
-    host.innerHTML = '<div class="chart">' + cols + '</div>'
+    host.innerHTML =
+        '<div class="plot-row">'
+      +   '<div class="yax">' + axis + '</div>'
+      +   '<div class="plot">' + grid + '<div class="chart">' + cols + '</div></div>'
+      + '</div>'
       + '<div class="chart-x"><span>' + fmtTime(rows[0].at) + '</span>'
       + '<span>peak +' + max + '</span>'
       + '<span>' + (spanOne ? '' : fmtTime(rows[rows.length-1].at)) + '</span></div>';
