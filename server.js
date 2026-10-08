@@ -268,10 +268,10 @@ const PAGE = `<!DOCTYPE html>
   @keyframes rise{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
   @keyframes riseSm{from{opacity:0;transform:translateY(11px)}to{opacity:1;transform:none}}
   @keyframes sweep{
-    0%{opacity:0;transform:translateX(-115%) skewX(-16deg)}
+    0%{opacity:0;transform:translateX(-110%) skewX(-16deg)}
     15%{opacity:1}
     85%{opacity:1}
-    100%{opacity:0;transform:translateX(262%) skewX(-16deg)}}
+    100%{opacity:0;transform:translateX(300%) skewX(-16deg)}}
   @keyframes ring{0%{opacity:.5;transform:translate(-50%,-50%) scale(.55)}100%{opacity:0;transform:translate(-50%,-50%) scale(2)}}
   @keyframes floatUp{0%{opacity:0;transform:translateX(-50%) translateY(6px) scale(.9)}18%{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}80%{opacity:1}100%{opacity:0;transform:translateX(-50%) translateY(-30px) scale(1)}}
   @keyframes cardIn{from{opacity:0;transform:translateY(14px) scale(.96)}
@@ -321,7 +321,7 @@ const PAGE = `<!DOCTYPE html>
   /* the card. Its own background is the hinge seam colour; the four halves are
      inset 1px vertically, so a hairline of it shows through across the middle. */
   .dg{position:relative;display:inline-block;width:.84em;height:1.38em;
-      perspective:300px;transform-style:preserve-3d;
+      perspective:300px;-webkit-perspective:300px;
       border-radius:.12em;background:var(--card-seam);
       box-shadow:0 10px 22px -10px rgba(23,74,140,.5),
                  0 2px 4px -1px rgba(23,74,140,.3),
@@ -334,8 +334,7 @@ const PAGE = `<!DOCTYPE html>
   .dg:before{left:-.026em}
   .dg:after{right:-.026em}
 
-  .dg .h{position:absolute;left:0;right:0;height:calc(50% - 1px);overflow:hidden;display:block;
-         backface-visibility:hidden;-webkit-backface-visibility:hidden}
+  .dg .h{position:absolute;left:0;right:0;height:calc(50% - 1px);overflow:hidden;display:block}
   .dg .h > span{position:absolute;left:0;right:0;height:1.38em;line-height:1.38em;
          text-align:center;display:block}
   /* top halves catch the light, bottom halves fall away slightly */
@@ -348,8 +347,11 @@ const PAGE = `<!DOCTYPE html>
   .dg .st > span,.dg .ft > span{top:0}
   .dg .sb > span,.dg .fb > span{bottom:0}
   .dg .st,.dg .sb{z-index:1}
-  .dg .ft{z-index:3;transform-origin:bottom center}
-  .dg .fb{z-index:3;transform-origin:top center;transform:rotateX(90deg)}
+  /* only the two leaves that rotate hide their backface */
+  .dg .ft,.dg .fb{backface-visibility:hidden;-webkit-backface-visibility:hidden}
+  .dg .ft{z-index:3;transform-origin:bottom center;-webkit-transform-origin:bottom center}
+  .dg .fb{z-index:3;transform-origin:top center;-webkit-transform-origin:top center;
+          transform:rotateX(90deg);-webkit-transform:rotateX(90deg)}
   /* the folding panel darkens a touch as it swings, so the motion reads */
   .dg.go .ft{animation:foldTop var(--ft,.3s) cubic-bezier(.52,.04,.78,.46) var(--d,0ms) forwards}
   .dg.go .fb{animation:foldBot var(--fb,.34s) cubic-bezier(.2,.85,.3,1.06)
@@ -384,9 +386,11 @@ const PAGE = `<!DOCTYPE html>
   .sep{display:inline-block;width:.26em;text-align:center;align-self:flex-end;
        line-height:1.38em;color:var(--ink-2)}
   /* starts fully clear of the left edge, ends fully clear of the right */
-  .countwrap .shine{position:absolute;top:0;left:0;height:100%;width:38%;z-index:4;
+  .countwrap .shine{position:absolute;z-index:4;
+        top:var(--sh-t,0px);left:var(--sh-l,0px);
+        height:var(--sh-h,100%);width:var(--sh-w,34%);
         pointer-events:none;opacity:0;
-        transform:translateX(-115%) skewX(-16deg);
+        transform:translateX(-110%) skewX(-16deg);
         background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,.5) 40%,
                    rgba(255,255,255,.92) 50%,rgba(255,255,255,.5) 60%,transparent 100%);
         mix-blend-mode:overlay}
@@ -451,6 +455,14 @@ const PAGE = `<!DOCTYPE html>
        border:1px solid var(--line)}
   .tag i{width:8px;height:8px;border-radius:50%;display:block;background:#3b7ce8}
   .tag.t-last i{background:var(--amber)}
+  .seg{display:inline-flex;background:var(--surface-2);border:1px solid var(--line);
+       border-radius:999px;padding:2px;flex:none}
+  .seg-b{appearance:none;-webkit-appearance:none;border:0;background:transparent;
+       cursor:pointer;font:inherit;font-size:11.5px;font-weight:600;color:var(--muted);
+       padding:4px 11px;border-radius:999px;white-space:nowrap;
+       transition:background .18s,color .18s}
+  .seg-b.on{background:var(--surface);color:var(--blue);
+       box-shadow:0 1px 2px rgba(15,39,68,.12)}
   .panel-body{padding:18px 20px 20px}
 
   /* ---- activity chart ---- */
@@ -531,10 +543,16 @@ const PAGE = `<!DOCTYPE html>
     .brand-div,.brand-svc{display:none}
     .panel-head{padding:13px 15px}
     .panel-head .tag{display:none}
+    .seg-b{padding:4px 9px;font-size:11px}
     .panel-body{padding:15px}
     thead th,tbody td{padding-left:15px;padding-right:15px}
-    .chart{height:98px}
-    .countwrap{padding:8px 20px;border-radius:16px}
+    /* shrink the plot box, NOT .chart — .chart is height:100% of .plot now, and
+       pinning it to 98px left the bars floating 34px above the zero line */
+    .plot,.yax{height:104px}
+    .chart-empty{height:104px}
+    .countwrap{padding:8px 10px;border-radius:16px}
+    /* leave room for more digits on a narrow screen */
+    .count{font-size:clamp(34px,10.5vw,46px);min-width:3.6em}
   }
   @media(prefers-reduced-motion:reduce){
     .anim,.anim-sm{opacity:1;animation:none!important}
@@ -669,8 +687,11 @@ const PAGE = `<!DOCTYPE html>
     <section class="panel anim">
       <div class="panel-head">
         <h2>Submission activity</h2>
-        <div style="display:flex;gap:7px;align-items:center">
-          <span class="tag"><i></i>Per update</span>
+        <div style="display:flex;gap:8px;align-items:center">
+          <div class="seg" id="chartSeg" role="group" aria-label="Chart grouping">
+            <button type="button" class="seg-b on" data-mode="update">Per update</button>
+            <button type="button" class="seg-b" data-mode="day">Per day</button>
+          </div>
           <span class="tag t-last"><i></i>Latest</span>
         </div>
       </div>
@@ -709,6 +730,10 @@ const PAGE = `<!DOCTYPE html>
   let knownTop = null;       // timestamp of the newest history row we have rendered
   let rollFast = false;      // true only during the intro roll, for snappier folds
   let chartSig = null;       // fingerprint of the data the chart was last drawn from
+  let lastHistory = [];      // kept so the toggle can redraw without a fetch
+  let chartMode = 'update';  // 'update' = one bar per alert, 'day' = summed per IST day
+  try{ const m = localStorage.getItem('mtdChartMode');
+       if(m === 'day' || m === 'update') chartMode = m; }catch(e){}
   let histSig = null;        // same for the table, so polling never steals your scroll
 
   /* ---------- time helpers (all anchored to IST) ---------- */
@@ -732,6 +757,10 @@ const PAGE = `<!DOCTYPE html>
   }
   function dayKey(iso){
     return new Date(iso || Date.now()).toLocaleDateString('en-CA',{timeZone:TZ});
+  }
+  function fmtDay(iso){
+    return new Date(iso).toLocaleDateString('en-IN',
+      {timeZone:TZ,day:'numeric',month:'short'});
   }
   function hourOf(iso){
     return new Date(iso).toLocaleTimeString('en-GB',{timeZone:TZ,hour:'2-digit',hour12:false}).slice(0,2);
@@ -806,6 +835,23 @@ const PAGE = `<!DOCTYPE html>
     }, fast ? 190 : 700 + order * 70);
   }
 
+  // Size the shine onto the row of cards, so the highlight runs across the
+  // number itself rather than the whole reserved footprint.
+  function fitShine(){
+    const host = el('count'), wrap = el('countwrap');
+    if(!host || !wrap || !host.children.length) return;
+    const kids = host.children;
+    const a = kids[0].getBoundingClientRect();
+    const b = kids[kids.length - 1].getBoundingClientRect();
+    const w = wrap.getBoundingClientRect();
+    const span = b.right - a.left;
+    if(span <= 0) return;
+    wrap.style.setProperty('--sh-l', (a.left - w.left).toFixed(1) + 'px');
+    wrap.style.setProperty('--sh-w', (span * 0.34).toFixed(1) + 'px');
+    wrap.style.setProperty('--sh-t', (a.top - w.top).toFixed(1) + 'px');
+    wrap.style.setProperty('--sh-h', a.height.toFixed(1) + 'px');
+  }
+
   function paintNumber(value, flip){
     const host = el('count');
     const chars = Array.from(value.toLocaleString());
@@ -823,6 +869,7 @@ const PAGE = `<!DOCTYPE html>
       if(flip) cellFlip(cell, ch, order++);
       else { cellSet(cell, ch); order++; }
     });
+    fitShine();
   }
 
   function animateCount(from, to, opts){
@@ -865,6 +912,7 @@ const PAGE = `<!DOCTYPE html>
     // lay out the final shape with every digit parked on zero
     host.innerHTML = chars.map(ch => ch === ',' ? '<span class="sep">,</span>' : CELL).join('');
     chars.forEach((ch,i) => { if(ch !== ',') cellSet(host.children[i], '0'); });
+    fitShine();
 
     // digit columns, rightmost first
     const cols = [];
@@ -981,6 +1029,21 @@ const PAGE = `<!DOCTYPE html>
     }
   }
 
+  // Sum each IST day into one bar. Keyed on dayKey so the bucket boundaries
+  // match the "today" counter rather than drifting with the viewer's clock.
+  function dayBuckets(history){
+    const byDay = new Map();
+    (history || []).forEach(h => {
+      const k = dayKey(h.at);
+      const cur = byDay.get(k) || { day:k, added:0, at:h.at, runs:0 };
+      cur.added += Number(h.added) || 0;
+      cur.runs += 1;
+      if(new Date(h.at) > new Date(cur.at)) cur.at = h.at;
+      byDay.set(k, cur);
+    });
+    return [...byDay.values()].sort((a,b) => a.day < b.day ? -1 : 1);
+  }
+
   function sigOf(history){
     if(!history || !history.length) return 'empty';
     return history.length + '|' + history[0].at + '|' + history[0].added;
@@ -989,14 +1052,16 @@ const PAGE = `<!DOCTYPE html>
   /* ---------- activity chart: last 24 updates, oldest to newest ---------- */
   function renderChart(history){
     const host = el('chartHost');
-    const sig = sigOf(history);
+    const sig = chartMode + '|' + sigOf(history);
     if(sig === chartSig) return;      // nothing new: leave the bars alone
     chartSig = sig;
     if(!history || !history.length){
       host.innerHTML = '<div class="chart-empty">No activity recorded yet</div>';
       return;
     }
-    const rows = history.slice(0, 24).reverse();
+    const byDay = chartMode === 'day';
+    const rows = byDay ? dayBuckets(history).slice(-14)
+                       : history.slice(0, 24).reverse();
     const max = Math.max.apply(null, rows.map(h => Number(h.added)||0)) || 1;
 
     // Pick a round axis step (1, 2, 5, 10, 20, 50 …) aiming for ~3 gridlines,
@@ -1020,7 +1085,12 @@ const PAGE = `<!DOCTYPE html>
       const pct = Math.max(v > 0 ? 4 : 1, (v/ceiling)*100);
       const isLast = i === rows.length-1;
       return '<div class="col' + (isLast ? ' last' : '') + '">'
-           +   '<span class="tip">' + fmtTime(h.at) + ' &nbsp;<b>+' + v + '</b></span>'
+           +   '<span class="tip">'
+           +     (byDay ? fmtDay(h.at) + ' &nbsp;<b>+' + v + '</b>'
+                          + ' <span style="opacity:.6">(' + h.runs
+                          + (h.runs === 1 ? ' update)' : ' updates)') + '</span>'
+                        : fmtTime(h.at) + ' &nbsp;<b>+' + v + '</b>')
+           +   '</span>'
            +   (labelled ? '<span class="val">+' + v + '</span>' : '')
            +   '<span class="bar" style="height:' + pct.toFixed(1) + '%;animation-delay:' + (i*26) + 'ms"></span>'
            + '</div>';
@@ -1033,14 +1103,15 @@ const PAGE = `<!DOCTYPE html>
       + ((t/ceiling)*100).toFixed(2) + '%"></span>').join('');
 
     const spanOne = rows.length === 1;
+    const edge = byDay ? fmtDay : fmtTime;
     host.innerHTML =
         '<div class="plot-row">'
       +   '<div class="yax">' + axis + '</div>'
       +   '<div class="plot">' + grid + '<div class="chart">' + cols + '</div></div>'
       + '</div>'
-      + '<div class="chart-x"><span>' + fmtTime(rows[0].at) + '</span>'
-      + '<span>peak +' + max + '</span>'
-      + '<span>' + (spanOne ? '' : fmtTime(rows[rows.length-1].at)) + '</span></div>';
+      + '<div class="chart-x"><span>' + edge(rows[0].at) + '</span>'
+      + '<span>peak +' + max + (byDay ? ' in a day' : '') + '</span>'
+      + '<span>' + (spanOne ? '' : edge(rows[rows.length-1].at)) + '</span></div>';
   }
 
   /* ---------- recent updates table ---------- */
@@ -1084,7 +1155,8 @@ const PAGE = `<!DOCTYPE html>
       const s = await r.json();
 
       paintStats(s);
-      renderChart(s.history);
+      lastHistory = s.history || [];
+      renderChart(lastHistory);
       renderHistory(s.history);
 
       if(firstLoad){
@@ -1257,11 +1329,28 @@ const PAGE = `<!DOCTYPE html>
     setTimeout(()=>burst.remove(), 1800);
   }
 
+  (function initChartToggle(){
+    const seg = el('chartSeg');
+    if(!seg) return;
+    const paint = () => [...seg.children].forEach(b =>
+      b.classList.toggle('on', b.dataset.mode === chartMode));
+    paint();
+    [...seg.children].forEach(b => b.addEventListener('click', () => {
+      if(chartMode === b.dataset.mode) return;
+      chartMode = b.dataset.mode;
+      try{ localStorage.setItem('mtdChartMode', chartMode); }catch(e){}
+      paint();
+      chartSig = null;               // force a redraw in the new grouping
+      renderChart(lastHistory);
+    }));
+  })();
+
   orchestrate();
   poll();
   setInterval(poll, 4000);   // the figure itself only changes hourly; this just keeps the page in step
   // re-sync immediately when the tab comes back to the foreground
   document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) poll(); });
+  window.addEventListener('resize', fitShine);
 </script>
 </body>
 </html>`;
